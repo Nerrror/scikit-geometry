@@ -30,6 +30,10 @@ void init_skeleton(py::module&);
 void init_simplification(py::module&);
 void init_inscribed(py::module&);
 
+// 3D functionality
+
+void init_nef_polyhedron_3(py::module&);
+
 
 PYBIND11_MODULE(_skgeom, m) {
     m.doc() = "";
@@ -52,4 +56,6 @@ PYBIND11_MODULE(_skgeom, m) {
     init_skeleton(m);
     init_simplification(m);
     init_inscribed(m);
+    // add 3D functionality
+    init_nef_polyhedron_3(m);
 }
