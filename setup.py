@@ -124,6 +124,7 @@ ext_modules = [
             'src/arrangement.cpp',
             'src/principal_component_analysis.cpp',
             'src/minkowski.cpp',
+            'src/nef_polyhedron.cpp',
             'src/polyhedron.cpp',
             'src/aabb_tree.cpp',
             'src/voronoi_delaunay.cpp',
