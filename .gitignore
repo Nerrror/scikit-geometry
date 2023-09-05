@@ -120,3 +120,14 @@ ENV/
 # Spyder project settings
 .spyderproject
 
+# VS code project settings
+.vs/*
+settings.json
+CppProperties.json
+.ipch
+.wsuo
+.db
+.sqlite
+
+# additional 
+.temp/*
