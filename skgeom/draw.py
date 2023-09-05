@@ -331,6 +331,31 @@ def draw_voronoi(
         plt.gca().set_aspect(aspect_ratio)
 
 
+# TODO add some options
+def draw_polyhedron(
+        polyhedron:skgeom._skgeom.Polyhedron3,
+        **kwargs
+):
+    vertices = np.array([[v.point()[0], v.point()[1], v.point()[2]] for v in polyhedron.vertices], dtype=float)
+    points = np.array([v.point()for v in polyhedron.vertices])
+
+    idx = []
+
+    # this could probably be done with a polygon soup
+    for f in polyhedron.facets:
+        fidx = []
+        fidx.append(np.argwhere(f.halfedge().vertex().point() == points)[0,0])
+        fidx.append(np.argwhere(f.halfedge().next().vertex().point() == points)[0,0])
+        fidx.append(np.argwhere(f.halfedge().next().next().vertex().point() == points)[0,0])
+
+        idx.append(fidx)
+
+    fig, ax = plt.subplots(1,1, subplot_kw={'projection': '3d'})
+    # fig, ax = plt.gcf(), plt.gca()
+    ax.plot_trisurf(vertices[:,0], vertices[:,1], vertices[:,2], triangles = idx)
+
+
+
 def draw(obj, **kwargs):
     if isinstance(obj, skgeom._skgeom.Point2):
         draw_point(obj, **kwargs)
