@@ -3,8 +3,11 @@
 
 #include <CGAL/Polyhedron_3.h>
 #include <CGAL/IO/Polyhedron_iostream.h>
+#include <CGAL/Surface_mesh.h>
+#include <CGAL/boost/graph/copy_face_graph.h>
 
 typedef CGAL::Polyhedron_3<Kernel>                  Polyhedron_3;
+typedef CGAL::Surface_mesh<Point_3>                 Mesh;
 typedef typename Polyhedron_3::Halfedge             PolyhedronHalfedge;
 typedef typename Polyhedron_3::Halfedge_handle      PolyhedronHalfedge_handle;
 typedef typename Polyhedron_3::Halfedge_iterator    PolyhedronHalfedge_iterator;
@@ -18,7 +21,10 @@ typedef typename Polyhedron_3::Facet_handle     PolyhedronFacet_handle;
 typedef typename Polyhedron_3::Point_iterator   PolyhedronPoint_iterator;
 typedef typename Polyhedron_3::Edge_iterator    PolyhedronEdge_iterator;
 typedef typename Polyhedron_3::Plane_iterator   PolyhedronPlane_iterator;
-typedef typename Kernel::Point_3 Point_3;
+typedef typename Kernel::Point_3                Point_3;
+typedef typename Mesh::Vertex_index             Vertex_index;
+
+
 
 #include <iostream>
 #include "import_obj.hpp"
@@ -27,6 +33,37 @@ Polyhedron_3 polyhedron_from_string(std::string& str) {
     Polyhedron_3 res;
     importOBJ(str, &res);
     return res;
+}
+
+Polyhedron_3 polyhedron_from_vertices_and_vertex_indices(std::vector<Point_3> points, std::vector<std::vector<int>> indices) {
+    Mesh S;
+    std::vector<Mesh::Vertex_index> vidx;
+    for (Point_3 p : points) {
+        Mesh::Vertex_index v = S.add_vertex(p);
+        vidx.push_back(v);
+    }
+    for (auto idx : indices) {
+        S.add_face(vidx[idx[0]], vidx[idx[1]], vidx[idx[2]]);
+    }
+    Polyhedron_3 P;
+    CGAL::copy_face_graph(S, P);
+    return P;
+}
+
+Polyhedron_3 polyhedron_from_vertices_and_vertex_indices(std::vector<std::vector<float>> points, std::vector<std::vector<int>> indices) {
+    Mesh S;
+    std::vector<Mesh::Vertex_index> vidx;
+    for (std::vector<float> coords : points) {
+        Point_3 p(coords[0], coords[1], coords[2]);
+        Mesh::Vertex_index v = S.add_vertex(p);
+        vidx.push_back(v);
+    }
+    for (auto idx : indices) {
+        S.add_face(vidx[idx[0]], vidx[idx[1]], vidx[idx[2]]);
+    }
+    Polyhedron_3 P;
+    CGAL::copy_face_graph(S, P);
+    return P;
 }
 
 namespace pybind11 { namespace detail {
@@ -122,4 +159,5 @@ void init_polyhedron(py::module &m) {
     ;
 
     m.def("polyhedron_from_string", &polyhedron_from_string);
+    m.def("polyhedron_from_vertices_and_vertex_indices", &polyhedron_from_vertices_and_vertex_indices);
 }
