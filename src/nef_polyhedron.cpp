@@ -1,14 +1,16 @@
 // g++ -I ./include/ -I C:\Users\A.Luce\Anaconda3\envs\LID\include ./src/nef_polyhedron.cpp -o ./build/nef_polyhedron.obj -lgmp -lmpfr -lpybind
 // Include the necessary headers
-#include "skgeom.hpp"
+#include "./include/skgeom.hpp"
 #include "funcs.hpp"
 #include "import_obj.hpp"
 
 #include <pybind11/numpy.h>
 #include <pybind11/stl.h>
 
+#include <CGAL/Polyhedron_3.h>
 #include <CGAL/Nef_polyhedron_3.h>
 #include <CGAL/Exact_predicates_exact_constructions_kernel.h>
+#include <CGAL/Nef_3/polygon_mesh_to_nef_3.h>
 // #include <CGAL/IO/STL_reader.h>
 
 // Define the necessary types
