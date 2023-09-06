@@ -1,5 +1,6 @@
 #include "skgeom.hpp"
 #include "funcs.hpp"
+#include "pybind11/numpy.h"
 
 struct Intersection_visitor {
   typedef py::object result_type;
@@ -413,6 +414,12 @@ void init_skgeom_kernel(py::module &m) {
         .def("__getitem__", &Point_3::operator[])
         .def("cartesian", &Point_3::cartesian)
         .def("transform", &Point_3::transform)
+        .def("numpy", [](Point_3 &self /* self */) -> py::array_t<double> {
+            // Create a NumPy array from the x, y, and z class methods
+            double data[] = {CGAL::to_double(self.x()), CGAL::to_double(self.y()), CGAL::to_double(self.z())};
+            py::array_t<double> numpy_array(sizeof(data) / sizeof(data[0]), data);
+            return numpy_array;
+        })
         .def(py::self == Point_3())
         .def(py::self != Point_3())
         .def(py::self < Point_3())
