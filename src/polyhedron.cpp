@@ -58,7 +58,7 @@ Polyhedron_3 polyhedron_from_vertices_and_vertex_indices(std::vector<std::vector
         Mesh::Vertex_index v = S.add_vertex(p);
         vidx.push_back(v);
     }
-    for (auto idx : indices) {
+    for (std::vector<int> idx : indices) {
         S.add_face(vidx[idx[0]], vidx[idx[1]], vidx[idx[2]]);
     }
     Polyhedron_3 P;
@@ -156,8 +156,18 @@ void init_polyhedron(py::module &m) {
         // .add_property("planes", &py_planes<Plane_iterator,Polyhedron_3>)
         // .add_property("halfedges", &py_halfedges<Halfedge_iterator,Halfedge_handle,Polyhedron_3>)
         // .add_property("border_halfedges", &py_border_halfedges<Halfedge_iterator,Halfedge_handle,Polyhedron_3>)
+        .def("_ipython_display_", [](Polyhedron_3& s) {
+            py::module::import("skgeom.draw").attr("draw_polyhedron")(
+                s);
+        })
     ;
-
     m.def("polyhedron_from_string", &polyhedron_from_string);
-    m.def("polyhedron_from_vertices_and_vertex_indices", &polyhedron_from_vertices_and_vertex_indices);
+    m.def(
+        "polyhedron_from_vertices_and_vertex_indices", 
+        py::overload_cast<std::vector<Point_3>, std::vector<std::vector<int>>>(&polyhedron_from_vertices_and_vertex_indices)
+    );
+    m.def(
+        "polyhedron_from_vertices_and_vertex_indices", 
+        py::overload_cast<std::vector<std::vector<float>>, std::vector<std::vector<int>>>(&polyhedron_from_vertices_and_vertex_indices)
+    );
 }
