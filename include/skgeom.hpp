@@ -12,6 +12,7 @@
 #include <CGAL/connect_holes.h>
 #include <CGAL/centroid.h>
 #include <CGAL/version.h>
+#include <CGAL/number_utils.h>
 
 #include <pybind11/pybind11.h>
 #include <pybind11/pytypes.h>
