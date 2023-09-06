@@ -3,6 +3,7 @@ try:
     from matplotlib import cm
     import matplotlib.patches as patches
     from matplotlib.path import Path
+    from mpl_toolkits import mplot3d
 except ImportError:
     raise ImportError("The `matplotlib` package is required by the skgeom.draw module.")
 
@@ -334,25 +335,45 @@ def draw_voronoi(
 # TODO add some options
 def draw_polyhedron(
         polyhedron:skgeom._skgeom.Polyhedron3,
+        color='r',
+        cmap=None,
+        alpha_face=1.,
+        linecolors = 'k',
+        linewidths = 1.,
+        linestyles = '--',
         **kwargs
 ):
     vertices = np.array([[v.point()[0], v.point()[1], v.point()[2]] for v in polyhedron.vertices], dtype=float)
     points = np.array([v.point()for v in polyhedron.vertices])
 
-    idx = []
+    triangles = []
+    edges = []
 
     # this could probably be done with a polygon soup
     for f in polyhedron.facets:
-        fidx = []
-        fidx.append(np.argwhere(f.halfedge().vertex().point() == points)[0,0])
-        fidx.append(np.argwhere(f.halfedge().next().vertex().point() == points)[0,0])
-        fidx.append(np.argwhere(f.halfedge().next().next().vertex().point() == points)[0,0])
+        h = f.halfedge()
+        tria_idx = []
+        edge_idx = []
+        tria_idx.append(np.argwhere(h.vertex().point() == points)[0,0])
+        tria_idx.append(np.argwhere(h.next().vertex().point() == points)[0,0])
+        tria_idx.append(np.argwhere(h.next().next().vertex().point() == points)[0,0])
 
-        idx.append(fidx)
+        edge_idx.append(h.vertex().point().numpy())
+        edge_idx.append(h.next().vertex().point().numpy())
+        edge_idx.append(h.next().next().vertex().point().numpy())
+        edge_idx.append(h.next().next().next().vertex().point().numpy())       
+
+        triangles.append(tria_idx)
+        edges.append(edge_idx)
+
+    edges = np.array(edges)
 
     fig, ax = plt.subplots(1,1, subplot_kw={'projection': '3d'})
     # fig, ax = plt.gcf(), plt.gca()
-    ax.plot_trisurf(vertices[:,0], vertices[:,1], vertices[:,2], triangles = idx)
+
+    ax.plot_trisurf(vertices[:,0], vertices[:,1], vertices[:,2], triangles=triangles, color=color, cmap=cmap, alpha=alpha_face)
+    ax.add_collection3d(mplot3d.art3d.Line3DCollection(edges, colors=linecolors, linewidths=linewidths, linestyles=linestyles))
+
 
 
 
@@ -383,6 +404,8 @@ def draw(obj, **kwargs):
         draw_polygon_set(obj, **kwargs)
     elif isinstance(obj, skgeom._skgeom.voronoi.VoronoiDiagram):
         draw_voronoi(obj, **kwargs)
+    elif isinstance(obj, skgeom._skgeom.Polyhedron3):
+        draw_polyhedron(obj, **kwargs)
     elif isinstance(obj, list):
         for el in obj:
             draw(el, **kwargs)

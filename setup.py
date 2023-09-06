@@ -111,7 +111,8 @@ if sys.platform == 'darwin':
 ext_modules = [
     Extension(
         'skgeom._skgeom',
-        [
+        [   
+            # 'src/nef_polyhedron.cpp',
             'src/simplification.cpp',
             'src/polygon_set.cpp',
             'src/skgeom.cpp',
@@ -124,7 +125,6 @@ ext_modules = [
             'src/arrangement.cpp',
             'src/principal_component_analysis.cpp',
             'src/minkowski.cpp',
-            'src/nef_polyhedron.cpp',
             'src/polyhedron.cpp',
             'src/aabb_tree.cpp',
             'src/voronoi_delaunay.cpp',
