@@ -22,6 +22,7 @@ void init_visibility(py::module&);
 void init_principal_component_analysis(py::module&);
 void init_minkowski(py::module&);
 void init_polyhedron(py::module&);
+void init_nef_polyhedron(py::module&);
 void init_aabb_tree(py::module&);
 void init_voronoi_delaunay(py::module&);
 void init_optimal_transport(py::module&);
@@ -29,11 +30,6 @@ void init_polygon_offset(py::module&);
 void init_skeleton(py::module&);
 void init_simplification(py::module&);
 void init_inscribed(py::module&);
-
-// 3D functionality
-
-// void init_nef_polyhedron_3(py::module&);
-
 
 PYBIND11_MODULE(_skgeom, m) {
     m.doc() = "";
@@ -49,6 +45,7 @@ PYBIND11_MODULE(_skgeom, m) {
     init_principal_component_analysis(m);
     init_minkowski(m);
     init_polyhedron(m);
+    init_nef_polyhedron(m);
     init_aabb_tree(m);
     init_voronoi_delaunay(m);
     init_optimal_transport(m);
@@ -56,6 +53,4 @@ PYBIND11_MODULE(_skgeom, m) {
     init_skeleton(m);
     init_simplification(m);
     init_inscribed(m);
-    // add 3D functionality
-    // init_nef_polyhedron_3(m);
 }

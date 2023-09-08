@@ -100,7 +100,7 @@ void init_polyhedron(py::module &m) {
         // .def(init<size_t, size_t, size_t, optional<const kernel&>>())
         .def("reserve", &Polyhedron_3::reserve,reserve_doc)
         .def("make_tetrahedron", (PolyhedronHalfedge_handle (Polyhedron_3::*)()) &Polyhedron_3::make_tetrahedron,make_tetrahedron_doc)
-        .def("make_tetrahedron", (PolyhedronHalfedge_handle (Polyhedron_3::*)(const Point_3&, const Point_3&, const Point_3&, const Point_3&) )&Polyhedron_3::make_tetrahedron)
+        .def("make_tetrahedron", (PolyhedronHalfedge_handle (Polyhedron_3::*)(const Point_3&, const Point_3&, const Point_3&, const Point_3&)) &Polyhedron_3::make_tetrahedron)
         .def("make_triangle", (PolyhedronHalfedge_handle (Polyhedron_3::*)()) &Polyhedron_3::make_triangle, make_triangle_doc)
         .def("make_triangle", (PolyhedronHalfedge_handle (Polyhedron_3::*)(const Point_3&, const Point_3&, const Point_3&)) &Polyhedron_3::make_triangle)
          // .def("get_allocator", &Polyhedron_3::get_allocator)
