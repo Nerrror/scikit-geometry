@@ -86,6 +86,12 @@ void init_skgeom_kernel(py::module &m) {
         .def("dimension", &Point_2::dimension)
         .def("bbox", &Point_2::bbox)
         .def("transform", &Point_2::transform)
+        .def("numpy", [](Point_2 &self) -> py::array_t<double> {
+            // Create a NumPy array from the x and y class methods
+            double data[] = {CGAL::to_double(self.x()), CGAL::to_double(self.y())};
+            py::array_t<double> numpy_array(sizeof(data) / sizeof(data[0]), data);
+            return numpy_array;
+        })
         .def(py::self < Point_2())
         .def(py::self <= Point_2())
         .def(py::self > Point_2())
@@ -118,6 +124,12 @@ void init_skgeom_kernel(py::module &m) {
         .def("hw", &Vector_2::hw)
         .def("transform", &Vector_2::transform)
         .def("dimension", &Vector_2::dimension)
+        .def("numpy", [](Vector_2 &self) -> py::array_t<double> {
+            // Create a NumPy array from the x and y class methods
+            double data[] = {CGAL::to_double(self.x()), CGAL::to_double(self.y())};
+            py::array_t<double> numpy_array(sizeof(data) / sizeof(data[0]), data);
+            return numpy_array;
+        })
         .def(-py::self)
         .def(py::self * double())
         .def(double() * py::self)
@@ -164,6 +176,12 @@ void init_skgeom_kernel(py::module &m) {
         .def("dx", &Direction_2::dx)
         .def("dy", &Direction_2::dy)
         .def("counterclockwise_in_between", &Direction_2::counterclockwise_in_between)
+        .def("numpy", [](Direction_2 &self) -> py::array_t<double> {
+            // Create a NumPy array from the x and y class methods
+            double data[] = {CGAL::to_double(self.dx()), CGAL::to_double(self.dy())};
+            py::array_t<double> numpy_array(sizeof(data) / sizeof(data[0]), data);
+            return numpy_array;
+        })
         .def(-py::self)
         .def(py::self == Direction_2())
         .def(py::self != Direction_2())
@@ -414,7 +432,7 @@ void init_skgeom_kernel(py::module &m) {
         .def("__getitem__", &Point_3::operator[])
         .def("cartesian", &Point_3::cartesian)
         .def("transform", &Point_3::transform)
-        .def("numpy", [](Point_3 &self /* self */) -> py::array_t<double> {
+        .def("numpy", [](Point_3 &self) -> py::array_t<double> {
             // Create a NumPy array from the x, y, and z class methods
             double data[] = {CGAL::to_double(self.x()), CGAL::to_double(self.y()), CGAL::to_double(self.z())};
             py::array_t<double> numpy_array(sizeof(data) / sizeof(data[0]), data);
@@ -549,6 +567,12 @@ void init_skgeom_kernel(py::module &m) {
         .def("transform", &Vector_3::transform)
         .def("__getitem__", &Vector_3::operator[])
         .def("__repr__", &toString<Vector_3>)
+        .def("numpy", [](Vector_3 &self) -> py::array_t<double> {
+            // Create a NumPy array from the x, y, and z class methods
+            double data[] = {CGAL::to_double(self.x()), CGAL::to_double(self.y()), CGAL::to_double(self.z())};
+            py::array_t<double> numpy_array(sizeof(data) / sizeof(data[0]), data);
+            return numpy_array;
+        })
         .def(py::self == py::self)
         .def(py::self != py::self)
         .def(-py::self)
