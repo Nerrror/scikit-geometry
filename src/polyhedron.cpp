@@ -2,6 +2,7 @@
 #include "docs/docs_polyhedron.h"
 
 #include <CGAL/Polyhedron_3.h>
+#include <CGAL/IO/STL.h>
 #include <CGAL/IO/Polyhedron_iostream.h>
 #include <CGAL/Surface_mesh.h>
 #include <CGAL/boost/graph/copy_face_graph.h>
@@ -18,11 +19,13 @@ typedef typename Polyhedron_3::Vertex_handle    PolyhedronVertex_handle;
 typedef typename Polyhedron_3::Vertex_iterator  PolyhedronVertex_iterator;
 typedef typename Polyhedron_3::Facet            PolyhedronFacet;
 typedef typename Polyhedron_3::Facet_handle     PolyhedronFacet_handle;
+typedef typename Polyhedron_3::Facet_iterator   PolyhedronFacet_iterator;
 typedef typename Polyhedron_3::Point_iterator   PolyhedronPoint_iterator;
 typedef typename Polyhedron_3::Edge_iterator    PolyhedronEdge_iterator;
 typedef typename Polyhedron_3::Plane_iterator   PolyhedronPlane_iterator;
 typedef typename Kernel::Point_3                Point_3;
 typedef typename Mesh::Vertex_index             Vertex_index;
+
 
 
 
@@ -50,21 +53,37 @@ Polyhedron_3 polyhedron_from_vertices_and_vertex_indices(std::vector<Point_3> po
     return P;
 }
 
-Polyhedron_3 polyhedron_from_vertices_and_vertex_indices(std::vector<std::vector<float>> points, std::vector<std::vector<int>> indices) {
+Polyhedron_3 polyhedron_from_vertices_and_vertex_indices(std::vector<std::array<float, 3>> points, std::vector<std::array<int, 3>> indices) {
     Mesh S;
     std::vector<Mesh::Vertex_index> vidx;
-    for (std::vector<float> coords : points) {
+    for (auto coords : points) {
         Point_3 p(coords[0], coords[1], coords[2]);
         Mesh::Vertex_index v = S.add_vertex(p);
         vidx.push_back(v);
     }
-    for (std::vector<int> idx : indices) {
+    for (auto idx : indices) {
         S.add_face(vidx[idx[0]], vidx[idx[1]], vidx[idx[2]]);
     }
     Polyhedron_3 P;
     CGAL::copy_face_graph(S, P);
     return P;
 }
+
+// Polyhedron_3 polyhedron_from_vertices_and_vertex_indices(std::vector<std::vector<float>> points, std::vector<std::vector<int>> indices) {
+//     Mesh S;
+//     std::vector<Mesh::Vertex_index> vidx;
+//     for (std::vector<float> coords : points) {
+//         Point_3 p(coords[0], coords[1], coords[2]);
+//         Mesh::Vertex_index v = S.add_vertex(p);
+//         vidx.push_back(v);
+//     }
+//     for (std::vector<int> idx : indices) {
+//         S.add_face(vidx[idx[0]], vidx[idx[1]], vidx[idx[2]]);
+//     }
+//     Polyhedron_3 P;
+//     CGAL::copy_face_graph(S, P);
+//     return P;
+// }
 
 namespace pybind11 { namespace detail {
     CGAL_HOLDER_HELPER(PolyhedronVertex, PolyhedronVertex_handle);
@@ -97,6 +116,12 @@ void init_polyhedron(py::module &m) {
     py::class_<Polyhedron_3>(m, "Polyhedron3", Polyhedron_3_doc)
         .def(py::init<>())
         .def(py::init<Polyhedron_3>())
+        .def(py::init([](std::vector<std::array<float, 3>>& p, std::vector<std::array<int, 3>>& i){
+            return polyhedron_from_vertices_and_vertex_indices(p, i);
+        }), py::arg("vertices"), py::arg("index"))
+        .def(py::init([](std::vector<Point_3>& p, std::vector<std::vector<int>>& i){
+            return polyhedron_from_vertices_and_vertex_indices(p, i);
+        }), py::arg("vertices"), py::arg("index"))
         // .def(init<size_t, size_t, size_t, optional<const kernel&>>())
         .def("reserve", &Polyhedron_3::reserve,reserve_doc)
         .def("make_tetrahedron", (PolyhedronHalfedge_handle (Polyhedron_3::*)()) &Polyhedron_3::make_tetrahedron,make_tetrahedron_doc)
@@ -157,17 +182,34 @@ void init_polyhedron(py::module &m) {
         // .add_property("halfedges", &py_halfedges<Halfedge_iterator,Halfedge_handle,Polyhedron_3>)
         // .add_property("border_halfedges", &py_border_halfedges<Halfedge_iterator,Halfedge_handle,Polyhedron_3>)
         .def("_ipython_display_", [](Polyhedron_3& s) {
-            py::module::import("skgeom.draw").attr("draw_polyhedron")(
-                s);
+            py::module::import("skgeom.draw").attr("draw_polyhedron")(s);
         })
+        .def("write_stl", [](Polyhedron_3& self, std::string& file){
+            bool success;
+            success = CGAL::IO::write_STL(file, self);
+            return success; 
+        }, py::arg("filename"))
+        // .def("write_stl", [](std::ostream& file, Polyhedron_3& self){
+        //     Mesh S;
+        //     CGAL::copy_face_graph(self, S);
+        //     bool success = CGAL::IO::write_STL(file, S);
+        //     return success;
+        // })
     ;
+    m.def("write_stl", [](std::string& file, Polyhedron_3& self){
+            bool success;
+            success = CGAL::IO::write_STL(file, self);
+            return success; 
+        }, py::arg("filename"), py::arg("sg.Polyhedron3"));
     m.def("polyhedron_from_string", &polyhedron_from_string);
     m.def(
         "polyhedron_from_vertices_and_vertex_indices", 
-        py::overload_cast<std::vector<Point_3>, std::vector<std::vector<int>>>(&polyhedron_from_vertices_and_vertex_indices)
+        py::overload_cast<std::vector<Point_3>, std::vector<std::vector<int>>>(&polyhedron_from_vertices_and_vertex_indices),
+        py::arg("vertices"), py::arg("index")
     );
     m.def(
         "polyhedron_from_vertices_and_vertex_indices", 
-        py::overload_cast<std::vector<std::vector<float>>, std::vector<std::vector<int>>>(&polyhedron_from_vertices_and_vertex_indices)
+        py::overload_cast<std::vector<std::array<float, 3>>, std::vector<std::array<int, 3>>>(&polyhedron_from_vertices_and_vertex_indices),
+        py::arg("vertices"), py::arg("index")
     );
 }
