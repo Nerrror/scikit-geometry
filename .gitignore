@@ -126,8 +126,9 @@ settings.json
 CppProperties.json
 .ipch
 .wsuo
-.db
-.sqlite
+*.db
+*.sqlite
 
 # additional 
 .temp/*
+*.stl
