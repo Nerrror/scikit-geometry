@@ -10,18 +10,22 @@
 #include <pybind11/numpy.h>
 #include <pybind11/stl.h>
 
+#include <CGAL/IO/STL.h>
 #include <CGAL/Polyhedron_3.h>
 #include <CGAL/Nef_polyhedron_3.h>
 #include <CGAL/Nef_3/polygon_mesh_to_nef_3.h>
-#include <CGAL/IO/STL.h>
+
 
 // Define the necessary types
 // Kernel & Point_3 is defined in skgeom.hpp
 // typedef CGAL::Exact_predicates_exact_constructions_kernel Kernel;
 // typedef Kernel::Point_3 Point_3;
 
-typedef CGAL::Polyhedron_3<Kernel> Polyhedron_3;
-typedef CGAL::Nef_polyhedron_3<Kernel> Nef_polyhedron_3;
+namespace py = pybind11;
+
+typedef CGAL::Polyhedron_3<Kernel>              Polyhedron_3;
+typedef CGAL::Nef_polyhedron_3<Kernel>          Nef_polyhedron_3;
+typedef Kernel::Aff_transformation_3            Aff_transformation_3;
 
 // Function to build a Nef_polyhedron_3 from a numpy array of vertices
 // void build_nef_polyhedron_from_vertices(Nef_polyhedron_3 &poly, const py::array_t<double> &vertices)
@@ -54,8 +58,8 @@ void init_nef_polyhedron(py::module &m){
         // Default constructor
         .def(py::init<>())
         .def(py::init([](Polyhedron_3 poly)
-            {return Nef_polyhedron_3(poly);}
-        ))
+            {return Nef_polyhedron_3(poly);})
+        )
         // TODO advanced build nef_poly methods
         // Constructor from a vector of Point_3
         // .def(py::init([](const std::vector<Point_3> &vertices)
@@ -97,6 +101,8 @@ void init_nef_polyhedron(py::module &m){
                 { return self.intersection(other); })
         .def("__sub__", [](Nef_polyhedron_3& self, const Nef_polyhedron_3& other)
                 { return self.difference(other); })
+        .def("__xor__", [](Nef_polyhedron_3& self, const Nef_polyhedron_3& other)
+                { return self.symmetric_difference(other); })
         .def("__neg__", &Nef_polyhedron_3::complement)
 
         // // Other methods
@@ -108,17 +114,25 @@ void init_nef_polyhedron(py::module &m){
         .def("is_space", &Nef_polyhedron_3::is_space)
 
         .def("simplify", &Nef_polyhedron_3::simplify)
+        .def("transform", &Nef_polyhedron_3::transform)
         // // String representation of the object
         // .def("__repr__", &toString<Nef_polyhedron_3>)
-        // .def("_ipython_display_", [](Nef_polyhedron_3& s) {
-        //     py::module::import("skgeom.draw").attr("draw_nef_polyhedron")(s);
-        // })
+        .def("_ipython_display_", [](Nef_polyhedron_3& s) {
+            py::module::import("skgeom.draw").attr("draw_nef_polyhedron")(s);
+        })
         .def("to_polyhedron", [](Nef_polyhedron_3& self){
             Polyhedron_3 P;
             self.convert_to_polyhedron(P);
             return P;
         })
-        // .def("to_poly", &convert_to_polyhedron_wrapper<py::object>)
+        // .def("write_stl", [](Nef_polyhedron_3& self, std::string& file){
+        //     Polyhedron_3 P;
+        //     self.convert_to_polyhedron(P);
+        //     bool success;
+        //     success = CGAL::IO::write_STL(file, P);
+        //     return success; 
+        // }, py::arg("self"), py::arg("filename"))
         ;
-        // m.def("to_poly", &Nef_polyhedron_3::convert_to_polyhedron);
+        // TODO: To Numpy
+        
 }
