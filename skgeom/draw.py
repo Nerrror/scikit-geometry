@@ -374,7 +374,27 @@ def draw_polyhedron(
     ax.plot_trisurf(vertices[:,0], vertices[:,1], vertices[:,2], triangles=triangles, color=color, cmap=cmap, alpha=alpha_face)
     ax.add_collection3d(mplot3d.art3d.Line3DCollection(edges, colors=linecolors, linewidths=linewidths, linestyles=linestyles))
 
-
+def draw_nef_polyhedron(
+    nef_poly:skgeom._skgeom.NefPolyhedron3,
+    color='r',
+    cmap=None,
+    alpha_face=1.,
+    linecolors = 'k',
+    linewidths = 1.,
+    linestyles = '--',
+    **kwargs
+):
+    P = nef_poly.to_poly()
+    draw_polyhedron(
+        P, 
+        color=color,
+        cmap=cmap,
+        alpha_face=alpha_face,
+        linecolors = linecolors,
+        linewidths = linewidths,
+        linestyles = linestyles,
+        **kwargs
+    )
 
 
 def draw(obj, **kwargs):
